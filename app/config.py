@@ -1,7 +1,33 @@
 """Application configuration from environment variables."""
 
+import json
 from functools import lru_cache
+from typing import Any
+
+from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+_DEFAULT_CORS_ORIGINS = ["http://localhost:5173", "http://localhost:3000"]
+_DEFAULT_CORS_ORIGINS_STR = ",".join(_DEFAULT_CORS_ORIGINS)
+
+
+def _parse_cors_origins(value: Any) -> list[str]:
+    """Accept JSON array, comma-separated URLs, or empty (use defaults)."""
+    if value is None:
+        return list(_DEFAULT_CORS_ORIGINS)
+    if isinstance(value, list):
+        return [str(x).strip() for x in value if str(x).strip()]
+    if isinstance(value, str):
+        s = value.strip()
+        if not s:
+            return list(_DEFAULT_CORS_ORIGINS)
+        if s.startswith("["):
+            parsed = json.loads(s)
+            if not isinstance(parsed, list):
+                raise ValueError("CORS_ORIGINS as JSON must be an array of strings")
+            return [str(x).strip() for x in parsed if str(x).strip()]
+        return [part.strip() for part in s.split(",") if part.strip()]
+    raise TypeError("cors_origins must be a list or string")
 
 
 class Settings(BaseSettings):
@@ -40,12 +66,20 @@ class Settings(BaseSettings):
     google_client_secret: str = ""
     google_redirect_uri: str = "http://localhost:8000/auth/google/callback"
 
-    # CORS
-    cors_origins: list[str] = ["http://localhost:5173", "http://localhost:3000"]
+    # Stored as str so pydantic-settings does not JSON-decode .env values (comma-separated is common).
+    cors_origins_raw: str = Field(
+        default=_DEFAULT_CORS_ORIGINS_STR,
+        validation_alias="CORS_ORIGINS",
+    )
 
     # Rate limiting
     rate_limit_public: str = "100/minute"
     rate_limit_authenticated: str = "1000/minute"
+
+    @property
+    def cors_origins(self) -> list[str]:
+        """Origins for CORSMiddleware: comma-separated or JSON array in CORS_ORIGINS."""
+        return _parse_cors_origins(self.cors_origins_raw)
 
 
 @lru_cache

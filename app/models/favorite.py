@@ -3,9 +3,8 @@
 from datetime import datetime, timezone
 from uuid import uuid4
 
-from sqlalchemy import DateTime, Integer, func
+from sqlalchemy import DateTime, Enum as SQLEnum, ForeignKey, Integer, func
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy import Enum as SQLEnum
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
@@ -24,6 +23,7 @@ class Favorite(Base):
     )
     user_id: Mapped[UUID] = mapped_column(
         UUID(as_uuid=True),
+        ForeignKey("users.id", ondelete="CASCADE"),
         nullable=False,
         index=True,
     )
