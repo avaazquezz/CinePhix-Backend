@@ -1,0 +1,57 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: cinephix-api
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://postgres:${POSTGRES_PASSWORD}@postgres:5432/cinephix
+      - REDIS_URL=redis://redis:6379/0
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY}
+      - TMDB_API_KEY=${TMDB_API_KEY}
+      - RESEND_API_KEY=${RESEND_API_KEY}
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
+      - EMAIL_FROM=noreply@cinephix.com
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - cinephix-network
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: cinephix-postgres
+    restart: unless-stopped
+    environment:
+      - POSTGRES_DB=cinephix
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - cinephix-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: cinephix-redis
+    restart: unless-stopped
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+    networks:
+      - cinephix-network
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  cinephix-network:
+    driver: bridge
