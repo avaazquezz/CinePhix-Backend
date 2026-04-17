@@ -7,16 +7,8 @@ from sqlalchemy import DateTime, ForeignKey, Integer, String, Text, func
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.Enum import Enum as SQLEnum
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-import enum
-
 from app.database import Base
-
-
-class MediaType(str, enum.Enum):
-    """Type of media item."""
-
-    MOVIE = "movie"
-    TV = "tv"
+from app.models.enums import MediaType
 
 
 class WatchlistItem(Base):

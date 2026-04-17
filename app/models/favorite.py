@@ -3,20 +3,13 @@
 from datetime import datetime, timezone
 from uuid import uuid4
 
-from sqlalchemy import DateTime, ForeignKey, Integer, func
+from sqlalchemy import DateTime, Integer, func
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.Enum import Enum as SQLEnum
+from sqlalchemy import Enum as SQLEnum
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-import enum
 
 from app.database import Base
-
-
-class MediaType(str, enum.Enum):
-    """Type of media item."""
-
-    MOVIE = "movie"
-    TV = "tv"
+from app.models.enums import MediaType
 
 
 class Favorite(Base):
@@ -49,11 +42,6 @@ class Favorite(Base):
 
     # Relationships
     user: Mapped["User"] = relationship("User", back_populates="favorites")
-
-    __table_args__ = (
-        # Unique constraint: user can't favorite same item twice
-        {"schema": None},
-    )
 
 
 # Import User at bottom to avoid circular imports
