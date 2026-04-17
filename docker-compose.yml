@@ -6,8 +6,9 @@ services:
     container_name: cinephix-api
     restart: unless-stopped
     ports:
-      # Host port defaults to 8000; set API_HOST_PORT=8001 in .env if something else uses 8000
-      - "${API_HOST_PORT:-8001}:8001"
+      # Host:container — uvicorn escucha en 8000 dentro de la imagen (ver Dockerfile).
+      # Por defecto publicamos en el host 8001; cambia API_HOST_PORT en .env si hace falta.
+      - "${API_HOST_PORT:-8001}:8000"
     environment:
       - DATABASE_URL=postgresql+asyncpg://postgres:${POSTGRES_PASSWORD:-postgres}@postgres:5432/cinephix
       - REDIS_URL=redis://redis:6379/0
@@ -53,6 +54,8 @@ volumes:
   postgres_data:
   redis_data:
 
+# Creada por el compose del frontend (u otra stack) con name: cinephix-network.
+# Si aún no existe: docker network create cinephix-network
 networks:
   cinephix-network:
-    driver: bridge
+    external: true
