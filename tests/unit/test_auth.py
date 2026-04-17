@@ -14,7 +14,10 @@ class TestAuthService:
     @pytest.fixture
     def mock_db(self):
         """Create a mock database session."""
-        return AsyncMock()
+        db = AsyncMock()
+        # AsyncSession.add is synchronous; AsyncMock would make add() return an unawaited coroutine.
+        db.add = MagicMock()
+        return db
 
     @pytest.fixture
     def auth_service(self, mock_db):
@@ -145,6 +148,8 @@ class TestAuthService:
     @pytest.mark.asyncio
     async def test_authenticate_wrong_password(self, auth_service, mock_db):
         """Test authentication fails with wrong password."""
+        from app.utils.security import hash_password
+
         mock_user = MagicMock()
         mock_user.password_hash = hash_password("correctpassword")
 
@@ -173,7 +178,7 @@ class TestPasswordHashing:
 
     def test_different_hashes_for_same_password(self):
         """Test that same password produces different hashes (salt)."""
-        from app.utils.security import hash_password
+        from app.utils.security import hash_password, verify_password
 
         password = "SamePassword"
         hash1 = hash_password(password)

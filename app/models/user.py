@@ -3,7 +3,7 @@
 from datetime import datetime, timezone
 from uuid import uuid4
 
-from sqlalchemy import Boolean, DateTime, String, Text, func
+from sqlalchemy import Boolean, DateTime, ForeignKey, String, Text, func
 from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -94,11 +94,6 @@ class User(Base):
         back_populates="user",
         cascade="all, delete-orphan",
     )
-    magic_links: Mapped[list["MagicLink"]] = relationship(
-        "MagicLink",
-        back_populates="user",
-        cascade="all, delete-orphan",
-    )
 
 
 class UserPreferences(Base):
@@ -113,6 +108,7 @@ class UserPreferences(Base):
     )
     user_id: Mapped[UUID] = mapped_column(
         UUID(as_uuid=True),
+        ForeignKey("users.id", ondelete="CASCADE"),
         unique=True,
         nullable=False,
         index=True,
@@ -172,6 +168,7 @@ class RefreshToken(Base):
     )
     user_id: Mapped[UUID] = mapped_column(
         UUID(as_uuid=True),
+        ForeignKey("users.id", ondelete="CASCADE"),
         nullable=False,
         index=True,
     )
@@ -229,9 +226,6 @@ class MagicLink(Base):
         DateTime(timezone=True),
         server_default=func.now(),
     )
-
-    # Relationships
-    user: Mapped["User"] = relationship("User", back_populates="magic_links")
 
 
 # Import these at bottom to avoid circular imports

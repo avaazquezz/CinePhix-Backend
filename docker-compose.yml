@@ -6,9 +6,10 @@ services:
     container_name: cinephix-api
     restart: unless-stopped
     ports:
-      - "8000:8000"
+      # Host port defaults to 8000; set API_HOST_PORT=8001 in .env if something else uses 8000
+      - "${API_HOST_PORT:-8001}:8001"
     environment:
-      - DATABASE_URL=postgresql+asyncpg://postgres:${POSTGRES_PASSWORD}@postgres:5432/cinephix
+      - DATABASE_URL=postgresql+asyncpg://postgres:${POSTGRES_PASSWORD:-postgres}@postgres:5432/cinephix
       - REDIS_URL=redis://redis:6379/0
       - JWT_SECRET_KEY=${JWT_SECRET_KEY}
       - TMDB_API_KEY=${TMDB_API_KEY}
@@ -29,7 +30,7 @@ services:
     environment:
       - POSTGRES_DB=cinephix
       - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-postgres}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:

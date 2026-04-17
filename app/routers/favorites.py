@@ -81,9 +81,9 @@ async def remove_from_favorites(
 @router.get("/check/{tmdb_id}", response_model=FavoriteCheck)
 async def check_is_favorite(
     tmdb_id: int,
-    media_type: str = "movie",
-    current_user: CurrentUser = Depends(get_current_user),
+    current_user: CurrentUser,
     db: AsyncSession = Depends(get_db),
+    media_type: str = "movie",
 ):
     """Check if a specific item is in user's favorites."""
     result = await db.execute(
@@ -98,6 +98,3 @@ async def check_is_favorite(
     favorite = result.scalar_one_or_none()
 
     return FavoriteCheck(is_favorite=favorite is not None, favorite_id=favorite.id if favorite else None)
-
-
-from app.dependencies import get_current_user
