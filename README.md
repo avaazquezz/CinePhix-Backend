@@ -107,4 +107,4 @@ mypy app/           # Type checking
 
 ## License
 
-MIT
+MIT- PR: https://github.com/avaazquezz/CinePhix-Backend/pull/1
