@@ -94,6 +94,29 @@ class User(Base):
         back_populates="user",
         cascade="all, delete-orphan",
     )
+    reviews: Mapped[list["Review"]] = relationship(
+        "Review",
+        back_populates="user",
+        cascade="all, delete-orphan",
+    )
+    stats: Mapped["UserStats"] = relationship(
+        "UserStats",
+        back_populates="user",
+        uselist=False,
+        cascade="all, delete-orphan",
+    )
+    followers: Mapped[list["UserFollow"]] = relationship(
+        "UserFollow",
+        foreign_keys="UserFollow.following_id",
+        back_populates="following",
+        cascade="all, delete-orphan",
+    )
+    following: Mapped[list["UserFollow"]] = relationship(
+        "UserFollow",
+        foreign_keys="UserFollow.follower_id",
+        back_populates="follower",
+        cascade="all, delete-orphan",
+    )
 
 
 class UserPreferences(Base):

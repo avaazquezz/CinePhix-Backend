@@ -8,7 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.config import settings
 from app.database import init_db, close_db
 from app.redis import close_redis
-from app.routers import auth_router, users_router, watchlist_router, favorites_router, tmdb_router
+from app.routers import auth_router, users_router, watchlist_router, favorites_router, tmdb_router, reviews_router, follows_router, user_stats_router
 
 
 @asynccontextmanager
@@ -44,6 +44,9 @@ app.include_router(users_router)
 app.include_router(watchlist_router)
 app.include_router(favorites_router)
 app.include_router(tmdb_router)
+app.include_router(reviews_router)
+app.include_router(follows_router)
+app.include_router(user_stats_router)
 
 
 @app.get("/health")
