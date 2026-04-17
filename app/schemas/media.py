@@ -51,3 +51,39 @@ class TMDBGenreList(BaseModel):
     """Schema for TMDB genre list."""
 
     genres: list[dict[str, Any]]
+
+
+class TMDBCastMember(BaseModel):
+    """Schema for a cast member in credits."""
+
+    id: int
+    name: str
+    original_name: str | None = None
+    character: str | None = None
+    known_for_department: str | None = None
+    profile_path: str | None = None
+    popularity: float | None = None
+    cast_id: int | None = None
+    credit_id: str | None = None
+    order: int | None = None
+
+
+class TMDBCrewMember(BaseModel):
+    """Schema for a crew member in credits."""
+
+    id: int
+    name: str
+    original_name: str | None = None
+    department: str | None = None
+    job: str | None = None
+    known_for_department: str | None = None
+    profile_path: str | None = None
+    popularity: float | None = None
+    credit_id: str | None = None
+
+
+class TMDBCreditsResponse(BaseModel):
+    """Schema for TMDB credits response (cast + crew)."""
+
+    cast: list[TMDBCastMember]
+    crew: list[TMDBCrewMember]

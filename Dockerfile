@@ -13,15 +13,16 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-# Copy installed packages from builder
-COPY --from=builder /root/.local /root/.local
+# Copy installed packages from builder (to user-accessible location)
+COPY --from=builder /root/.local /home/appuser/.local
 COPY --from=builder /app /app
 
 # Add Python to PATH
-ENV PATH=/root/.local/bin:$PATH
+ENV PATH=/home/appuser/.local/bin:$PATH
 
 # Non-root user for security
-RUN useradd --create-home --shell /bin/bash appuser
+RUN useradd --create-home --shell /bin/bash appuser && \
+    chown -R appuser:appuser /home/appuser/.local
 USER appuser
 
 # Expose port
