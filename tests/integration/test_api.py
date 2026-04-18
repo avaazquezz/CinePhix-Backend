@@ -112,6 +112,32 @@ class TestFavoritesEndpoints:
         assert response.status_code == 403
 
 
+class TestPaymentsEndpoints:
+    """Payments: public pro-status; checkout requires auth."""
+
+    @pytest.mark.asyncio
+    async def test_pro_status_without_auth_returns_200(self):
+        """Pricing page can poll pro status without a Bearer token."""
+        transport = ASGITransport(app=app)
+        async with AsyncClient(transport=transport, base_url="http://test") as client:
+            response = await client.get("/payments/pro-status")
+
+        assert response.status_code == 200
+        data = response.json()
+        assert data["pro"] is False
+        assert data["plan"] is None
+        assert data["expires_at"] is None
+
+    @pytest.mark.asyncio
+    async def test_legacy_pay_plan_without_auth_returns_403(self):
+        """Checkout aliases still require authentication."""
+        transport = ASGITransport(app=app)
+        async with AsyncClient(transport=transport, base_url="http://test") as client:
+            response = await client.post("/payments/pay_plan_pro_quarterly")
+
+        assert response.status_code == 403
+
+
 class TestTMDBEndpoints:
     """Tests for TMDB proxy endpoints (public)."""
 

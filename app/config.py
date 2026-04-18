@@ -7,7 +7,12 @@ from typing import Any
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-_DEFAULT_CORS_ORIGINS = ["http://localhost:5173", "http://localhost:3000"]
+_DEFAULT_CORS_ORIGINS = [
+    "http://localhost:5173",
+    "http://localhost:3000",
+    "http://127.0.0.1:5173",
+    "http://127.0.0.1:3000",
+]
 _DEFAULT_CORS_ORIGINS_STR = ",".join(_DEFAULT_CORS_ORIGINS)
 
 
@@ -60,6 +65,15 @@ class Settings(BaseSettings):
     # Email (Resend - free tier)
     resend_api_key: str = ""
     email_from: str = "CinePhix <noreply@cinephix.com>"
+
+    # Groq AI
+    groq_api_key: str = ""
+
+    # Stripe
+    stripe_secret_key: str = ""
+    stripe_publishable_key: str = ""
+    stripe_webhook_secret: str = ""
+    frontend_url: str = "http://localhost:3000"
 
     # OAuth Google
     google_client_id: str = ""

@@ -4,7 +4,7 @@ import httpx
 
 from app.config import settings
 from app.utils.cache import get_cached, set_cached, TMDB_MOVIE_TTL, TMDB_TRENDING_TTL, TMDB_SEARCH_TTL
-from app.schemas.media import TMDBMovieDetail, TMDBTrendingResponse, TMDBSearchResponse, TMDBGenreList
+from app.schemas.media import TMDBMovieDetail, TMDBTrendingResponse, TMDBSearchResponse, TMDBGenreList, TMDBCreditsResponse
 
 
 class TMDBService:
@@ -96,6 +96,28 @@ class TMDBService:
         data = await self._get("/genre/tv/list", {"api_key": self.api_key})
         await set_cached(cache_key, data.get("genres", []), TMDB_MOVIE_TTL)
         return data.get("genres", [])
+
+    async def get_movie_credits(self, movie_id: int) -> TMDBCreditsResponse:
+        """Get movie credits (cast + crew) with caching."""
+        cache_key = f"tmdb:movie:{movie_id}:credits"
+        cached = await get_cached(cache_key)
+        if cached:
+            return TMDBCreditsResponse(**cached)
+
+        data = await self._get(f"/movie/{movie_id}/credits", {"api_key": self.api_key})
+        await set_cached(cache_key, data, TMDB_MOVIE_TTL)
+        return TMDBCreditsResponse(**data)
+
+    async def get_tv_credits(self, tv_id: int) -> TMDBCreditsResponse:
+        """Get TV show credits (cast + crew) with caching."""
+        cache_key = f"tmdb:tv:{tv_id}:credits"
+        cached = await get_cached(cache_key)
+        if cached:
+            return TMDBCreditsResponse(**cached)
+
+        data = await self._get(f"/tv/{tv_id}/credits", {"api_key": self.api_key})
+        await set_cached(cache_key, data, TMDB_MOVIE_TTL)
+        return TMDBCreditsResponse(**data)
 
     def get_image_url(self, path: str | None, size: str = "w500") -> str | None:
         """Get full image URL from TMDB path."""

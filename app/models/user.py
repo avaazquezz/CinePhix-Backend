@@ -94,6 +94,51 @@ class User(Base):
         back_populates="user",
         cascade="all, delete-orphan",
     )
+    reviews: Mapped[list["Review"]] = relationship(
+        "Review",
+        back_populates="user",
+        cascade="all, delete-orphan",
+    )
+    stats: Mapped["UserStats"] = relationship(
+        "UserStats",
+        back_populates="user",
+        uselist=False,
+        cascade="all, delete-orphan",
+    )
+    notifications: Mapped[list["Notification"]] = relationship(
+        "Notification",
+        back_populates="user",
+        cascade="all, delete-orphan",
+    )
+    pro_account: Mapped["UserPro"] = relationship(
+        "UserPro",
+        back_populates="user",
+        uselist=False,
+        cascade="all, delete-orphan",
+    )
+    followers: Mapped[list["UserFollow"]] = relationship(
+        "UserFollow",
+        foreign_keys="UserFollow.following_id",
+        back_populates="following",
+        cascade="all, delete-orphan",
+    )
+    following: Mapped[list["UserFollow"]] = relationship(
+        "UserFollow",
+        foreign_keys="UserFollow.follower_id",
+        back_populates="follower",
+        cascade="all, delete-orphan",
+    )
+    lists: Mapped[list["List"]] = relationship(
+        "List",
+        back_populates="user",
+        cascade="all, delete-orphan",
+    )
+    activities: Mapped[list["ActivityFeed"]] = relationship(
+        "ActivityFeed",
+        foreign_keys="ActivityFeed.user_id",
+        back_populates="user",
+        cascade="all, delete-orphan",
+    )
 
 
 class UserPreferences(Base):

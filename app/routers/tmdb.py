@@ -4,7 +4,7 @@ from fastapi import APIRouter, Query
 from typing import Literal
 
 from app.services.tmdb_service import TMDBService
-from app.schemas.media import TMDBMovieDetail, TMDBTrendingResponse, TMDBSearchResponse
+from app.schemas.media import TMDBMovieDetail, TMDBTrendingResponse, TMDBSearchResponse, TMDBCreditsResponse
 
 router = APIRouter(prefix="/tmdb", tags=["TMDB"])
 
@@ -55,3 +55,17 @@ async def get_tv_genres():
     """Get list of TV genres."""
     service = TMDBService()
     return {"genres": await service.get_tv_genres()}
+
+
+@router.get("/movie/{movie_id}/credits", response_model=TMDBCreditsResponse)
+async def get_movie_credits(movie_id: int):
+    """Get movie credits (cast and crew) from TMDB with caching."""
+    service = TMDBService()
+    return await service.get_movie_credits(movie_id)
+
+
+@router.get("/tv/{tv_id}/credits", response_model=TMDBCreditsResponse)
+async def get_tv_credits(tv_id: int):
+    """Get TV show credits (cast and crew) from TMDB with caching."""
+    service = TMDBService()
+    return await service.get_tv_credits(tv_id)
