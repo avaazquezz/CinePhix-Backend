@@ -10,6 +10,7 @@ from app.routers.follows import router as follows_router
 from app.routers.user_stats import router as user_stats_router
 from app.routers.lists import router as lists_router
 from app.routers.activity import router as activity_router
+from app.routers.notifications import router as notifications_router
 
 __all__ = [
     "auth_router",
@@ -22,4 +23,5 @@ __all__ = [
     "user_stats_router",
     "lists_router",
     "activity_router",
+    "notifications_router",
 ]

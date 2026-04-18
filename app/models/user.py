@@ -105,6 +105,11 @@ class User(Base):
         uselist=False,
         cascade="all, delete-orphan",
     )
+    notifications: Mapped[list["Notification"]] = relationship(
+        "Notification",
+        back_populates="user",
+        cascade="all, delete-orphan",
+    )
     followers: Mapped[list["UserFollow"]] = relationship(
         "UserFollow",
         foreign_keys="UserFollow.following_id",

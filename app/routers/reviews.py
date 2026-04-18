@@ -10,6 +10,7 @@ from sqlalchemy.orm import selectinload
 from app.database import get_db
 from app.dependencies import CurrentUser
 from app.models import Review, ReviewVote, User, VoteType
+from app.services.notification_service import notify_review_liked
 from app.schemas.review import (
     ReviewCreate,
     ReviewListResponse,
@@ -288,6 +289,21 @@ async def vote_review(
 
     await db.flush()
     await db.refresh(review)
+
+    # Notify review owner (only on useful vote, not own review)
+    if review.user_id != current_user.id and new_vote_type == VoteType.USEFUL:
+        # Get review owner username for notification data
+        owner_result = await db.execute(select(User).where(User.id == review.user_id))
+        owner = owner_result.scalar_one_or_none()
+        if owner:
+            await notify_review_liked(
+                db,
+                review_owner_id=str(review.user_id),
+                liker_username=current_user.username,
+                tmdb_id=review.tmdb_id,
+                media_type=review.media_type,
+                review_id=review.id,
+            )
 
     return ReviewVoteResponse(
         review_id=review.id,

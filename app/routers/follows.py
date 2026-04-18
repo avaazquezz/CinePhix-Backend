@@ -10,6 +10,7 @@ from sqlalchemy.orm import selectinload
 from app.database import get_db
 from app.dependencies import CurrentUser, OptionalUser
 from app.models import User, UserFollow, UserStats
+from app.services.notification_service import notify_new_follower
 from app.schemas.user_stats import (
     FollowersListResponse,
     FollowStatusResponse,
@@ -62,6 +63,14 @@ async def follow_user(
     # Update stats for both users
     await _increment_followers_count(db, user_id, +1)
     await _increment_following_count(db, current_user.id, +1)
+
+    # Notification
+    await notify_new_follower(
+        db,
+        follower_id=str(current_user.id),
+        following_id=str(user_id),
+        follower_username=current_user.username,
+    )
 
     return follow
 

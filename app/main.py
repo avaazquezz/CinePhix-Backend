@@ -2,13 +2,14 @@
 
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Query
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import settings
 from app.database import init_db, close_db
 from app.redis import close_redis
-from app.routers import auth_router, users_router, watchlist_router, favorites_router, tmdb_router, reviews_router, follows_router, user_stats_router, lists_router, activity_router
+from app.routers import auth_router, users_router, watchlist_router, favorites_router, tmdb_router, reviews_router, follows_router, user_stats_router, lists_router, activity_router, notifications_router
+from app.services.notification_service import manager
 
 
 @asynccontextmanager
@@ -49,6 +50,7 @@ app.include_router(follows_router)
 app.include_router(user_stats_router)
 app.include_router(lists_router)
 app.include_router(activity_router)
+app.include_router(notifications_router)
 
 
 @app.get("/health")
@@ -65,3 +67,29 @@ async def root():
         "version": settings.app_version,
         "docs": "/docs",
     }
+
+
+@app.websocket("/ws/notifications")
+async def websocket_notifications(websocket: WebSocket, token: str = Query(...)):
+    """
+    WebSocket endpoint for real-time notifications.
+    Client must provide a valid JWT access token as query param 'token'.
+    Connection is per-user; multiple tabs share the same user_id.
+    """
+    # Validate token
+    from app.services.auth_service import verify_access_token
+    payload = verify_access_token(token)
+    if not payload:
+        await websocket.close(code=4001, reason="Invalid or expired token")
+        return
+
+    user_id = str(payload.get("sub"))
+    await manager.connect(websocket, user_id)
+    try:
+        while True:
+            # Keep alive — receive any ping from client
+            data = await websocket.receive_text()
+            if data == "ping":
+                await websocket.send_text("pong")
+    except WebSocketDisconnect:
+        manager.disconnect(websocket, user_id)
