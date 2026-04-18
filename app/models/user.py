@@ -117,6 +117,17 @@ class User(Base):
         back_populates="follower",
         cascade="all, delete-orphan",
     )
+    lists: Mapped[list["List"]] = relationship(
+        "List",
+        back_populates="user",
+        cascade="all, delete-orphan",
+    )
+    activities: Mapped[list["ActivityFeed"]] = relationship(
+        "ActivityFeed",
+        foreign_keys="ActivityFeed.user_id",
+        back_populates="user",
+        cascade="all, delete-orphan",
+    )
 
 
 class UserPreferences(Base):

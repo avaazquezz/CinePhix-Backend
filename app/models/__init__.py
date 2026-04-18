@@ -7,6 +7,9 @@ from app.models.review import Review
 from app.models.review_vote import ReviewVote, VoteType
 from app.models.user_stats import UserStats
 from app.models.follow import UserFollow
+from app.models.list import List
+from app.models.list_item import ListItem
+from app.models.activity_feed import ActivityFeed
 
 __all__ = [
     "User",
@@ -20,4 +23,7 @@ __all__ = [
     "VoteType",
     "UserStats",
     "UserFollow",
+    "List",
+    "ListItem",
+    "ActivityFeed",
 ]

@@ -8,6 +8,8 @@ from app.routers.tmdb import router as tmdb_router
 from app.routers.reviews import router as reviews_router
 from app.routers.follows import router as follows_router
 from app.routers.user_stats import router as user_stats_router
+from app.routers.lists import router as lists_router
+from app.routers.activity import router as activity_router
 
 __all__ = [
     "auth_router",
@@ -18,4 +20,6 @@ __all__ = [
     "reviews_router",
     "follows_router",
     "user_stats_router",
+    "lists_router",
+    "activity_router",
 ]
