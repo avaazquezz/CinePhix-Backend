@@ -18,6 +18,8 @@ from app.routers.watched import router as watched_router
 from app.routers.list_comments import router as list_comments_router
 from app.routers.list_collaborators import router as list_collaborators_router
 from app.routers.review_comments import router as review_comments_router
+from app.routers.activity_v2 import router as activity_v2_router
+from app.routers.follows_v2 import router as follows_v2_router
 from app.routers.discover import router as discover_router
 
 __all__ = [
@@ -40,4 +42,6 @@ __all__ = [
     "list_comments_router",
     "list_collaborators_router",
     "review_comments_router",
+    "activity_v2_router",
+    "follows_v2_router",
 ]
