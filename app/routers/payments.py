@@ -4,13 +4,16 @@ Stripe Payments router — one-time payment checkout for Pro plans.
 """
 
 from datetime import datetime, timedelta, timezone
-from fastapi import APIRouter, Body, Depends, HTTPException, Query, Request
+
 import stripe
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
+from sqlalchemy import select
 
 from app.config import settings
-from app.dependencies import CurrentUser
-from app.models import UserPro
 from app.database import get_db
+from app.dependencies import CurrentUser, OptionalUser
+from app.models import UserPro
+from app.models.user import User
 
 router = APIRouter(prefix="/payments", tags=["payments"])
 
@@ -38,12 +41,16 @@ def _grant_pro_access(plan_type: str):
     return now, expires
 
 
-@router.post("/create-checkout-session")
-async def create_checkout_session(
-    current_user: CurrentUser,
-    plan: str = Query(..., description="pro_monthly | pro_quarterly | pro_6months | pro_annual"),
-    db=Depends(get_db),
-):
+def _stripe_error_detail(exc: stripe.error.StripeError) -> str:
+    """Stripe Python v10+ uses different attributes than legacy ``.message``."""
+    for attr in ("user_message", "_message", "message"):
+        val = getattr(exc, attr, None)
+        if val:
+            return str(val)
+    return str(exc)
+
+
+async def _create_checkout_session_impl(current_user: User, plan: str) -> dict:
     if not settings.stripe_secret_key:
         raise HTTPException(status_code=500, detail="Stripe not configured")
 
@@ -69,16 +76,54 @@ async def create_checkout_session(
             },
         )
         return {"checkout_url": session.url, "session_id": session.id}
+    except stripe.error.AuthenticationError:
+        raise HTTPException(
+            status_code=502,
+            detail="Stripe rejected the API key (invalid, revoked, or wrong mode). "
+            "Use a secret key from the same Stripe mode as your Price IDs (e.g. sk_test_… locally).",
+        )
     except stripe.error.StripeError as e:
-        raise HTTPException(status_code=502, detail=f"Stripe error: {e.message}")
+        raise HTTPException(status_code=502, detail=f"Stripe error: {_stripe_error_detail(e)}")
+
+
+@router.post("/create-checkout-session")
+async def create_checkout_session(
+    current_user: CurrentUser,
+    plan: str = Query(..., description="pro_monthly | pro_quarterly | pro_6months | pro_annual"),
+):
+    return await _create_checkout_session_impl(current_user, plan)
+
+
+# Legacy paths used by some frontends (POST /payments/pay_plan_pro_quarterly, etc.)
+@router.post("/pay_plan_pro_monthly", include_in_schema=False)
+async def pay_plan_pro_monthly(current_user: CurrentUser):
+    return await _create_checkout_session_impl(current_user, "pro_monthly")
+
+
+@router.post("/pay_plan_pro_quarterly", include_in_schema=False)
+async def pay_plan_pro_quarterly(current_user: CurrentUser):
+    return await _create_checkout_session_impl(current_user, "pro_quarterly")
+
+
+@router.post("/pay_plan_pro_6months", include_in_schema=False)
+async def pay_plan_pro_6months(current_user: CurrentUser):
+    return await _create_checkout_session_impl(current_user, "pro_6months")
+
+
+@router.post("/pay_plan_pro_annual", include_in_schema=False)
+async def pay_plan_pro_annual(current_user: CurrentUser):
+    return await _create_checkout_session_impl(current_user, "pro_annual")
 
 
 @router.get("/pro-status")
 async def pro_status(
-    current_user: CurrentUser,
+    current_user: OptionalUser,
     db=Depends(get_db),
 ):
-    from sqlalchemy import select
+    """Public when logged out (returns pro: false); uses token when the client sends it."""
+    if current_user is None:
+        return {"pro": False, "plan": None, "expires_at": None}
+
     result = await db.execute(
         select(UserPro).where(UserPro.user_id == current_user.id)
     )
@@ -123,7 +168,6 @@ async def stripe_webhook(
         plan = session["metadata"]["plan"]
         granted, expires = _grant_pro_access(plan)
 
-        from sqlalchemy import select
         result = await db.execute(select(UserPro).where(UserPro.user_id == user_id))
         existing = result.scalar_one_or_none()
 
@@ -154,7 +198,6 @@ async def grant_pro_admin(
     user_id: str = Query(...),
     db=Depends(get_db),
 ):
-    from sqlalchemy import select
     if plan not in PLAN_DURATION:
         raise HTTPException(status_code=400, detail="Invalid plan")
 
