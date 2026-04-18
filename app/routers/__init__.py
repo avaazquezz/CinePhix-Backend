@@ -15,6 +15,8 @@ from app.routers.ai import router as ai_router
 from app.routers.payments import router as payments_router
 from app.routers.trakt import router as trakt_router
 from app.routers.watched import router as watched_router
+from app.routers.list_comments import router as list_comments_router
+from app.routers.list_collaborators import router as list_collaborators_router
 from app.routers.discover import router as discover_router
 
 __all__ = [
@@ -34,4 +36,6 @@ __all__ = [
     "trakt_router",
     "discover_router",
     "watched_router",
+    "list_comments_router",
+    "list_collaborators_router",
 ]
