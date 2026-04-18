@@ -14,8 +14,13 @@ class UserResponse(BaseModel):
     username: str
     display_name: str | None
     avatar_url: str | None
+    bio: str | None
     is_pro: bool
     created_at: datetime
+    # Stats (fetched separately or joined)
+    reviews_count: int = 0
+    followers_count: int = 0
+    following_count: int = 0
 
     model_config = {"from_attributes": True}
 
@@ -25,6 +30,7 @@ class UserUpdate(BaseModel):
 
     display_name: str | None = Field(None, max_length=100)
     avatar_url: str | None = None
+    bio: str | None = Field(None, max_length=500)
     username: str | None = Field(None, min_length=3, max_length=50, pattern=r"^[a-zA-Z0-9_]+$")
 
 
