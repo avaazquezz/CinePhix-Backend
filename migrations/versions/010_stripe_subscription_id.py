@@ -4,17 +4,18 @@ from alembic import op
 import sqlalchemy as sa
 
 revision = '010_stripe_subscription_id'
-down_revision = '009_follow_requests'
+down_revision = '009_schema_catchup'
 branch_labels = None
 depends_on = None
 
 
 def upgrade() -> None:
-    op.add_column(
-        'user_pro',
-        sa.Column('stripe_subscription_id', sa.String(200), nullable=True)
+    op.execute(
+        sa.text(
+            "ALTER TABLE user_pro ADD COLUMN IF NOT EXISTS stripe_subscription_id VARCHAR(200)"
+        )
     )
 
 
 def downgrade() -> None:
-    op.drop_column('user_pro', 'stripe_subscription_id')
+    op.execute(sa.text("ALTER TABLE user_pro DROP COLUMN IF EXISTS stripe_subscription_id"))

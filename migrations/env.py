@@ -2,9 +2,8 @@
 
 from logging.config import fileConfig
 
-from sqlalchemy import pool
-from sqlalchemy.engine import Connection
 from sqlalchemy import create_engine
+from sqlalchemy import pool
 
 from alembic import context
 
@@ -23,8 +22,11 @@ target_metadata = Base.metadata
 
 def get_url() -> str:
     """Get database URL from settings."""
-    # Convert async URL to sync for Alembic
-    return settings.database_url.replace("+asyncpg", "")
+    # Alembic runs synchronous SQLAlchemy; use psycopg2 driver (see pyproject.toml).
+    url = settings.database_url
+    if "+asyncpg" in url:
+        return url.replace("postgresql+asyncpg://", "postgresql+psycopg2://")
+    return url
 
 def run_migrations_offline() -> None:
     """Run migrations in 'offline' mode."""
@@ -42,7 +44,7 @@ def run_migrations_offline() -> None:
 
 def run_migrations_online() -> None:
     """Run migrations in 'online' mode."""
-    connectable = create_engine(get_url(), poolclass=pool.Connects)
+    connectable = create_engine(get_url(), poolclass=pool.NullPool)
 
     with connectable.connect() as connection:
         context.configure(connection=connection, target_metadata=target_metadata)

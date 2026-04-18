@@ -19,10 +19,10 @@ router = APIRouter(prefix="/payments", tags=["payments"])
 
 # Stripe price IDs (recurring — must be configured as recurring prices in Stripe Dashboard)
 STRIPE_PRICE_IDS = {
-    "pro_monthly": "price_1TNYfz4fVdVPl5MMkGzgjAXn",
-    "pro_quarterly": "price_1TNYfz4fVdVPl5MMDnfqznXd",
-    "pro_6months": "price_1TNYfz4fVdVPl5MMjmswrQBA",
-    "pro_annual": "price_1TNYg04fVdVPl5MMh8pEVqtt",
+    "pro_monthly": "price_1TNYUk4fVdVPl5MMI6uIBr1v",
+    "pro_quarterly": "price_1TNYUk4fVdVPl5MMKpBA2wqP",
+    "pro_6months": "price_1TNYUk4fVdVPl5MMtyWtx7PW",
+    "pro_annual": "price_1TNYUl4fVdVPl5MMwaGLzNbc",
 }
 
 # Duration mapping: plan_name → months
