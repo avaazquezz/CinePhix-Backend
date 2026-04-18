@@ -61,6 +61,9 @@ class Settings(BaseSettings):
     resend_api_key: str = ""
     email_from: str = "CinePhix <noreply@cinephix.com>"
 
+    # Groq AI
+    groq_api_key: str = ""
+
     # OAuth Google
     google_client_id: str = ""
     google_client_secret: str = ""

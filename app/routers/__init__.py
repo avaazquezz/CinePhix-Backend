@@ -11,6 +11,7 @@ from app.routers.user_stats import router as user_stats_router
 from app.routers.lists import router as lists_router
 from app.routers.activity import router as activity_router
 from app.routers.notifications import router as notifications_router
+from app.routers.ai import router as ai_router
 
 __all__ = [
     "auth_router",
@@ -24,4 +25,5 @@ __all__ = [
     "lists_router",
     "activity_router",
     "notifications_router",
+    "ai_router",
 ]
