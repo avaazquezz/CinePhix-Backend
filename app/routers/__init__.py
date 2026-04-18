@@ -13,6 +13,7 @@ from app.routers.activity import router as activity_router
 from app.routers.notifications import router as notifications_router
 from app.routers.ai import router as ai_router
 from app.routers.payments import router as payments_router
+from app.routers.trakt import router as trakt_router
 
 __all__ = [
     "auth_router",
@@ -28,4 +29,5 @@ __all__ = [
     "notifications_router",
     "ai_router",
     "payments_router",
+    "trakt_router",
 ]

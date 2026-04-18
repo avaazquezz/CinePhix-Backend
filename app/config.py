@@ -69,6 +69,11 @@ class Settings(BaseSettings):
     # Groq AI
     groq_api_key: str = ""
 
+    # Trakt.tv
+    trakt_client_id: str = ""
+    trakt_client_secret: str = ""
+    trakt_redirect_uri: str = "http://localhost:8000/integrations/trakt/callback"
+
     # Stripe
     stripe_secret_key: str = ""
     stripe_publishable_key: str = ""
