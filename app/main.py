@@ -9,6 +9,7 @@ from app.middleware.rate_limit import RateLimitMiddleware
 from app.config import settings
 from app.database import init_db, close_db
 from app.redis import close_redis
+from app.routers import review_comments_router
 from app.routers import auth_router, users_router, watchlist_router, favorites_router, tmdb_router, reviews_router, follows_router, user_stats_router, lists_router, activity_router, notifications_router, ai_router, payments_router, trakt_router, discover_router, watched_router, list_comments_router, list_collaborators_router
 from app.services.notification_service import manager
 
@@ -62,6 +63,7 @@ app.include_router(discover_router)
 app.include_router(watched_router)
 app.include_router(list_comments_router)
 app.include_router(list_collaborators_router)
+app.include_router(review_comments_router)
 
 
 @app.get("/health")

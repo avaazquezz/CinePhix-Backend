@@ -15,6 +15,7 @@ from app.models.user_pro import UserPro
 from app.models.trakt_connection import TraktConnection
 from app.models.watched_history import WatchedHistory
 from app.models.list_comment import ListComment
+from app.models.review_comment import ReviewComment
 
 __all__ = [
     "User",

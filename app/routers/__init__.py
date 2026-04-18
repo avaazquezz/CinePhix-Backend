@@ -17,6 +17,7 @@ from app.routers.trakt import router as trakt_router
 from app.routers.watched import router as watched_router
 from app.routers.list_comments import router as list_comments_router
 from app.routers.list_collaborators import router as list_collaborators_router
+from app.routers.review_comments import router as review_comments_router
 from app.routers.discover import router as discover_router
 
 __all__ = [
@@ -38,4 +39,5 @@ __all__ = [
     "watched_router",
     "list_comments_router",
     "list_collaborators_router",
+    "review_comments_router",
 ]
