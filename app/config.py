@@ -64,6 +64,12 @@ class Settings(BaseSettings):
     # Groq AI
     groq_api_key: str = ""
 
+    # Stripe
+    stripe_secret_key: str = ""
+    stripe_publishable_key: str = ""
+    stripe_webhook_secret: str = ""
+    frontend_url: str = "http://localhost:3000"
+
     # OAuth Google
     google_client_id: str = ""
     google_client_secret: str = ""

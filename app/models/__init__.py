@@ -11,6 +11,7 @@ from app.models.list import List
 from app.models.list_item import ListItem
 from app.models.activity_feed import ActivityFeed
 from app.models.notification import Notification
+from app.models.user_pro import UserPro
 
 __all__ = [
     "User",
@@ -28,4 +29,5 @@ __all__ = [
     "ListItem",
     "ActivityFeed",
     "Notification",
+    "UserPro",
 ]

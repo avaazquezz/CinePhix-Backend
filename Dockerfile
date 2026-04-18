@@ -7,6 +7,7 @@ WORKDIR /app
 COPY pyproject.toml README.md ./
 COPY app ./app/
 RUN pip install --no-cache-dir --user -e .
+RUN pip install --no-cache-dir --user stripe
 
 # Production stage
 FROM python:3.11-slim

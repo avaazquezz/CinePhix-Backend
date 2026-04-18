@@ -110,6 +110,12 @@ class User(Base):
         back_populates="user",
         cascade="all, delete-orphan",
     )
+    pro_account: Mapped["UserPro"] = relationship(
+        "UserPro",
+        back_populates="user",
+        uselist=False,
+        cascade="all, delete-orphan",
+    )
     followers: Mapped[list["UserFollow"]] = relationship(
         "UserFollow",
         foreign_keys="UserFollow.following_id",
