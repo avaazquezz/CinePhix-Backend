@@ -13,6 +13,7 @@ from app.models.activity_feed import ActivityFeed
 from app.models.notification import Notification
 from app.models.user_pro import UserPro
 from app.models.trakt_connection import TraktConnection
+from app.models.watched_history import WatchedHistory
 
 __all__ = [
     "User",
