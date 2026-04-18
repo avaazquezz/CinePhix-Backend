@@ -8,8 +8,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import get_db
 from app.schemas.user import UserResponse, UserUpdate, UserPreferencesResponse, UserPreferencesUpdate
+from app.schemas.review import ReviewResponse, ReviewListResponse
+from app.schemas.list import ListResponse
 from app.dependencies import CurrentUser
 from app.models.user import User, UserPreferences
+from app.models import UserStats, Review, List as UserList
 
 router = APIRouter(prefix="/users", tags=["Users"])
 
@@ -101,4 +104,74 @@ async def get_public_user_profile(username: str, db: AsyncSession = Depends(get_
     if not user:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
 
-    return user
+    # Fetch user stats
+    stats_result = await db.execute(select(UserStats).where(UserStats.user_id == user.id))
+    stats = stats_result.scalar_one_or_none()
+
+    return UserResponse(
+        id=user.id,
+        email=user.email,
+        username=user.username,
+        display_name=user.display_name,
+        avatar_url=user.avatar_url,
+        bio=user.bio,
+        is_pro=user.is_pro,
+        created_at=user.created_at,
+        reviews_count=stats.reviews_count if stats else 0,
+        followers_count=stats.followers_count if stats else 0,
+        following_count=stats.following_count if stats else 0,
+    )
+
+@router.get("/{username}/reviews", response_model=ReviewListResponse)
+async def get_public_user_reviews(
+    username: str,
+    db: AsyncSession = Depends(get_db),
+):
+    """Get public reviews by username."""
+
+
+    result = await db.execute(select(User).where(User.username == username))
+    user = result.scalar_one_or_none()
+    if not user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+
+    reviews_result = await db.execute(
+        select(Review)
+        .where(Review.user_id == user.id)
+        .order_by(Review.created_at.desc())
+    )
+    reviews = reviews_result.scalars().all()
+
+    return ReviewListResponse(
+        items=[ReviewResponse.model_validate(r) for r in reviews],
+        total=len(reviews),
+        page=1,
+        per_page=20,
+        pages=1,
+    )
+
+
+@router.get("/{username}/lists")
+async def get_public_user_lists(
+    username: str,
+    db: AsyncSession = Depends(get_db),
+):
+    """Get public lists by username."""
+
+
+    result = await db.execute(select(User).where(User.username == username))
+    user = result.scalar_one_or_none()
+    if not user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+
+    lists_result = await db.execute(
+        select(UserList)
+        .where(UserList.user_id == user.id, UserList.is_public == True)  # noqa: E712
+        .order_by(UserList.created_at.desc())
+    )
+    lists = lists_result.scalars().all()
+
+    return {
+        "lists": [ListResponse.model_validate(l) for l in lists],
+        "total": len(lists),
+    }

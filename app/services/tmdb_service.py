@@ -124,3 +124,93 @@ class TMDBService:
         if not path:
             return None
         return f"{self.image_base_url}/{size}{path}"
+
+    async def discover_movies(
+        self,
+        year: int | None = None,
+        genre: str | None = None,
+        vote_min: float | None = None,
+        vote_max: float | None = None,
+        sort_by: str = "popularity.desc",
+        page: int = 1,
+        per_page: int = 20,
+    ) -> dict:
+        """Discover movies with advanced filters."""
+        cache_key = f"tmdb:discover:movies:{year}:{genre}:{vote_min}:{vote_max}:{sort_by}:{page}:{per_page}"
+        cached = await get_cached(cache_key)
+        if cached:
+            return cached
+
+        params = {
+            "api_key": self.api_key,
+            "page": page,
+            "sort_by": sort_by,
+        }
+        if year:
+            params["primary_release_year"] = year
+        if genre:
+            params["with_genres"] = genre
+        if vote_min is not None:
+            params["vote_count.gte"] = 10
+            params["vote_average.gte"] = vote_min
+        if vote_max is not None:
+            params["vote_average.lte"] = vote_max
+
+        data = await self._get("/discover/movie", params)
+        await set_cached(cache_key, data, 900)
+        return data
+
+    async def discover_tv(
+        self,
+        year: int | None = None,
+        genre: str | None = None,
+        vote_min: float | None = None,
+        vote_max: float | None = None,
+        sort_by: str = "popularity.desc",
+        page: int = 1,
+        per_page: int = 20,
+    ) -> dict:
+        """Discover TV shows with advanced filters."""
+        cache_key = f"tmdb:discover:tv:{year}:{genre}:{vote_min}:{vote_max}:{sort_by}:{page}:{per_page}"
+        cached = await get_cached(cache_key)
+        if cached:
+            return cached
+
+        params = {
+            "api_key": self.api_key,
+            "page": page,
+            "sort_by": sort_by,
+        }
+        if year:
+            params["first_air_date_year"] = year
+        if genre:
+            params["with_genres"] = genre
+        if vote_min is not None:
+            params["vote_count.gte"] = 10
+            params["vote_average.gte"] = vote_min
+        if vote_max is not None:
+            params["vote_average.lte"] = vote_max
+
+        data = await self._get("/discover/tv", params)
+        await set_cached(cache_key, data, 900)
+        return data
+
+    async def get_genres(self) -> dict:
+        """Get all TMDB genres (movies + TV) with caching."""
+        cache_key = "tmdb:genres:all"
+        cached = await get_cached(cache_key)
+        if cached:
+            return cached
+
+        movie_resp = await self._get("/genre/movie/list", {"api_key": self.api_key})
+        tv_resp = await self._get("/genre/tv/list", {"api_key": self.api_key})
+
+        result = {
+            "movie_genres": movie_resp.get("genres", []),
+            "tv_genres": tv_resp.get("genres", []),
+        }
+        await set_cached(cache_key, result, TMDB_MOVIE_TTL)
+        return result
+
+# Singleton instance
+tmdb_service = TMDBService()

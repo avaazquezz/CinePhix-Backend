@@ -23,6 +23,9 @@ services:
       - STRIPE_WEBHOOK_SECRET=${STRIPE_WEBHOOK_SECRET}
       - FRONTEND_URL=${FRONTEND_URL:-http://localhost:3000}
       - GROQ_API_KEY=${GROQ_API_KEY}
+      - TRAKT_CLIENT_ID=${TRAKT_CLIENT_ID}
+      - TRAKT_CLIENT_SECRET=${TRAKT_CLIENT_SECRET}
+      - TRAKT_REDIRECT_URI=${TRAKT_REDIRECT_URI:-http://localhost:8000/integrations/trakt/callback}
     depends_on:
       - postgres
       - redis

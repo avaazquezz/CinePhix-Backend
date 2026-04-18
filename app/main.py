@@ -4,11 +4,13 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Query
 from fastapi.middleware.cors import CORSMiddleware
+from app.middleware.rate_limit import RateLimitMiddleware
 
 from app.config import settings
 from app.database import init_db, close_db
 from app.redis import close_redis
-from app.routers import auth_router, users_router, watchlist_router, favorites_router, tmdb_router, reviews_router, follows_router, user_stats_router, lists_router, activity_router, notifications_router, ai_router, payments_router
+from app.routers import review_comments_router, activity_v2_router, follows_v2_router
+from app.routers import auth_router, users_router, watchlist_router, favorites_router, tmdb_router, reviews_router, follows_router, user_stats_router, lists_router, activity_router, notifications_router, ai_router, payments_router, trakt_router, discover_router, watched_router, list_comments_router, list_collaborators_router
 from app.services.notification_service import manager
 
 
@@ -29,6 +31,9 @@ app = FastAPI(
     description="Backend API for CinePhix SaaS - Auth, Watchlist, Favorites, and TMDB integration",
     lifespan=lifespan,
 )
+
+# Rate limiting middleware
+app.add_middleware(RateLimitMiddleware)
 
 # CORS middleware
 app.add_middleware(
@@ -53,6 +58,14 @@ app.include_router(activity_router)
 app.include_router(notifications_router)
 app.include_router(ai_router)
 app.include_router(payments_router)
+app.include_router(trakt_router)
+app.include_router(discover_router)
+app.include_router(watched_router)
+app.include_router(list_comments_router)
+app.include_router(list_collaborators_router)
+app.include_router(review_comments_router)
+app.include_router(activity_v2_router)
+app.include_router(follows_v2_router)
 
 
 @app.get("/health")

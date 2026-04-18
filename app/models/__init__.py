@@ -12,6 +12,12 @@ from app.models.list_item import ListItem
 from app.models.activity_feed import ActivityFeed
 from app.models.notification import Notification
 from app.models.user_pro import UserPro
+from app.models.trakt_connection import TraktConnection
+from app.models.watched_history import WatchedHistory
+from app.models.list_comment import ListComment
+from app.models.review_comment import ReviewComment
+from app.models.activity_feed_v2 import ActivityFeedV2
+from app.models.follow_request import FollowRequest
 
 __all__ = [
     "User",
@@ -24,10 +30,10 @@ __all__ = [
     "ReviewVote",
     "VoteType",
     "UserStats",
-    "UserFollow",
     "List",
     "ListItem",
     "ActivityFeed",
     "Notification",
     "UserPro",
+    "TraktConnection",
 ]

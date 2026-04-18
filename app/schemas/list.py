@@ -17,7 +17,7 @@ class ListItemCreate(ListItemBase):
 class ListItemResponse(ListItemBase):
     model_config = ConfigDict(from_attributes=True)
 
-    id: int
+    id: UUID
     list_id: int
     added_at: datetime
 

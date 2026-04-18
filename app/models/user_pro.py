@@ -8,7 +8,7 @@ from app.database import Base
 
 
 class UserPro(Base):
-    """Pro subscription status per user — created on Stripe checkout success."""
+    """Pro subscription status per user — created on Stripe subscription checkout success."""
 
     __tablename__ = "user_pro"
 
@@ -19,6 +19,7 @@ class UserPro(Base):
     )
     plan_type: Mapped[str] = mapped_column(String(20), nullable=False, default="pro")
     stripe_session_id: Mapped[str | None] = mapped_column(String(200), nullable=True)
+    stripe_subscription_id: Mapped[str | None] = mapped_column(String(200), nullable=True)
     granted_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())

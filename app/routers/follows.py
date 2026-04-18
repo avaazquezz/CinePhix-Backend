@@ -106,14 +106,8 @@ async def unfollow_user(
     await _increment_following_count(db, current_user.id, -1)
 
 
-@router.get("/{user_id}/followers", response_model=FollowersListResponse)
-async def get_followers(
-    user_id: UUID,
-    page: int = Query(default=1, ge=1),
-    per_page: int = Query(default=20, ge=1, le=100),
-    db: AsyncSession = Depends(get_db),
-):
-    """Get a user's followers."""
+async def _placeholder_followers(db: AsyncSession, user_id: UUID):
+    pass
     # Count total
     count_result = await db.execute(
         select(func.count(UserFollow.id)).where(UserFollow.following_id == user_id)
@@ -142,14 +136,8 @@ async def get_followers(
     )
 
 
-@router.get("/{user_id}/following", response_model=FollowingListResponse)
-async def get_following(
-    user_id: UUID,
-    page: int = Query(default=1, ge=1),
-    per_page: int = Query(default=20, ge=1, le=100),
-    db: AsyncSession = Depends(get_db),
-):
-    """Get users a user is following."""
+async def _placeholder_following(db: AsyncSession, user_id: UUID):
+    pass
     # Count total
     count_result = await db.execute(
         select(func.count(UserFollow.id)).where(UserFollow.follower_id == user_id)
@@ -178,13 +166,8 @@ async def get_following(
     )
 
 
-@router.get("/{user_id}/follow-status", response_model=FollowStatusResponse)
-async def get_follow_status(
-    user_id: UUID,
-    current_user: OptionalUser,
-    db: AsyncSession = Depends(get_db),
-):
-    """Check if current user follows another user and get counts."""
+async def _placeholder_status(db: AsyncSession, user_id: UUID):
+    pass
     is_following = False
 
     if current_user:

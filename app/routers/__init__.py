@@ -13,6 +13,14 @@ from app.routers.activity import router as activity_router
 from app.routers.notifications import router as notifications_router
 from app.routers.ai import router as ai_router
 from app.routers.payments import router as payments_router
+from app.routers.trakt import router as trakt_router
+from app.routers.watched import router as watched_router
+from app.routers.list_comments import router as list_comments_router
+from app.routers.list_collaborators import router as list_collaborators_router
+from app.routers.review_comments import router as review_comments_router
+from app.routers.activity_v2 import router as activity_v2_router
+from app.routers.follows_v2 import router as follows_v2_router
+from app.routers.discover import router as discover_router
 
 __all__ = [
     "auth_router",
@@ -28,4 +36,12 @@ __all__ = [
     "notifications_router",
     "ai_router",
     "payments_router",
+    "trakt_router",
+    "discover_router",
+    "watched_router",
+    "list_comments_router",
+    "list_collaborators_router",
+    "review_comments_router",
+    "activity_v2_router",
+    "follows_v2_router",
 ]
