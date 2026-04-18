@@ -4,6 +4,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Query
 from fastapi.middleware.cors import CORSMiddleware
+from app.middleware.rate_limit import RateLimitMiddleware
 
 from app.config import settings
 from app.database import init_db, close_db
@@ -29,6 +30,9 @@ app = FastAPI(
     description="Backend API for CinePhix SaaS - Auth, Watchlist, Favorites, and TMDB integration",
     lifespan=lifespan,
 )
+
+# Rate limiting middleware
+app.add_middleware(RateLimitMiddleware)
 
 # CORS middleware
 app.add_middleware(

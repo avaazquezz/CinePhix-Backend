@@ -87,6 +87,7 @@ class Settings(BaseSettings):
     )
 
     # Rate limiting
+    rate_limit_enabled: bool = True
     rate_limit_public: str = "100/minute"
     rate_limit_authenticated: str = "1000/minute"
 
