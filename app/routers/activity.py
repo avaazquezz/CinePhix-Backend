@@ -4,25 +4,31 @@ Activity Feed router — timeline of followed users' activity.
 
 from typing import Optional
 from fastapi import APIRouter, Depends, Query
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, or_
+from sqlalchemy import select, func
 from sqlalchemy.orm import selectinload
 
 from app.database import get_db
-from app.dependencies import CurrentUser, OptionalUser, DBSession
+from app.dependencies import CurrentUser, DBSession
 from app.models import User, ActivityFeed, UserFollow
 from app.schemas.activity import ActivityFeedResponse, PaginatedActivityResponse
 
 router = APIRouter(prefix="/activity", tags=["activity"])
 
 
+def _activity_query_with_relations():
+    """Base query with eager loading of actor and user relations."""
+    return select(ActivityFeed).options(
+        selectinload(ActivityFeed.actor),
+        selectinload(ActivityFeed.user),
+    )
+
+
 @router.get("/me", response_model=PaginatedActivityResponse)
 async def get_my_activity_feed(
     current_user: CurrentUser,
-    *,
     page: int = Query(1, ge=1),
     per_page: int = Query(20, ge=1, le=50),
-    db: DBSession,
+    db=Depends(get_db),
 ):
     """
     Get activity feed for the current user — shows activity
@@ -37,22 +43,22 @@ async def get_my_activity_feed(
         )
     )
     following_ids = [str(r[0]) for r in following_result.fetchall()]
-    
+
     # Include own user ID too
     user_ids = following_ids + [str(current_user.id)]
 
-    # Query activity
+    # Count total
     count_result = await db.execute(
-        select(ActivityFeed)
-        .where(
-            ActivityFeed.user_id.in_([uid for uid in user_ids])
+        select(func.count(ActivityFeed.id)).where(
+            ActivityFeed.user_id.in_(user_ids)
         )
     )
-    total = len(count_result.scalars().all())
+    total = count_result.scalar() or 0
 
+    # Query with eager-loaded relations
     result = await db.execute(
-        select(ActivityFeed)
-        .where(ActivityFeed.user_id.in_([uid for uid in user_ids]))
+        _activity_query_with_relations()
+        .where(ActivityFeed.user_id.in_(user_ids))
         .order_by(ActivityFeed.created_at.desc())
         .offset(offset)
         .limit(per_page)
@@ -75,21 +81,21 @@ async def get_user_activity(
     user_id: str,
     page: int = Query(1, ge=1),
     per_page: int = Query(20, ge=1, le=50),
-    db: AsyncSession = Depends(get_db),
+    db=Depends(get_db),
 ):
     """Get public activity for a specific user."""
     offset = (page - 1) * per_page
 
     # Count total
     count_result = await db.execute(
-        select(ActivityFeed).where(
+        select(func.count(ActivityFeed.id)).where(
             ActivityFeed.user_id == user_id
         )
     )
-    total = len(count_result.scalars().all())
+    total = count_result.scalar() or 0
 
     result = await db.execute(
-        select(ActivityFeed)
+        _activity_query_with_relations()
         .where(ActivityFeed.user_id == user_id)
         .order_by(ActivityFeed.created_at.desc())
         .offset(offset)
@@ -112,25 +118,33 @@ async def get_user_activity(
 async def get_public_activity(
     page: int = Query(1, ge=1),
     per_page: int = Query(20, ge=1, le=50),
-    activity_type: Optional[str] = Query(None, description="Filter by type: review, follow, list, watchlist"),
-    db: AsyncSession = Depends(get_db),
+    activity_type: Optional[str] = Query(
+        None, description="Filter by type: review, follow, list, watchlist"
+    ),
+    db=Depends(get_db),
 ):
     """Get public activity feed (global timeline)."""
     offset = (page - 1) * per_page
 
-    query = select(ActivityFeed).order_by(ActivityFeed.created_at.desc())
-    count_query = select(ActivityFeed)
-
+    base_filter = []
     if activity_type:
-        query = query.where(ActivityFeed.activity_type == activity_type)
-        count_query = count_query.where(ActivityFeed.activity_type == activity_type)
+        base_filter.append(ActivityFeed.activity_type == activity_type)
 
-    # Count
+    # Count total
+    count_query = select(func.count(ActivityFeed.id))
+    if base_filter:
+        count_query = count_query.where(*base_filter)
     count_result = await db.execute(count_query)
-    total = len(count_result.scalars().all())
+    total = count_result.scalar() or 0
 
+    # Query with eager-loaded relations
+    query = _activity_query_with_relations()
+    if base_filter:
+        query = query.where(*base_filter)
     result = await db.execute(
-        query.offset(offset).limit(per_page)
+        query.order_by(ActivityFeed.created_at.desc())
+        .offset(offset)
+        .limit(per_page)
     )
     activities = result.scalars().all()
 

@@ -42,6 +42,9 @@ services:
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-postgres}
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./scripts:/scripts:ro
+    entrypoint: ["/bin/bash", "/scripts/entrypoint.sh"]
+    command: ["postgres"]
     ports:
       - "5432:5432"
     networks:
